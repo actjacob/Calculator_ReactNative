@@ -7,10 +7,28 @@ export default function ButtonComponent({ title, onPress, isBlue, isGray }) {
   const theme = useContext(ThemeContext);
   return (
     <TouchableOpacity
-      style={isBlue ? Styles.btnBlue : isGray ? Styles.btnGray : theme === "light" ? Styles.btnLight : Styles.btnDark}
+      style={
+        isBlue
+          ? Styles.btnBlue
+          : isGray
+          ? Styles.btnGray
+          : theme === "light"
+          ? Styles.btnLight
+          : Styles.btnDark
+      }
       onPress={onPress}
     >
-      <Text style={isBlue || isGray ? Styles.smallTextLight : theme === "dark" ? Styles.smallTextLight : Styles.smallTextDark}>{title} </Text>
+      <Text
+        style={
+          isBlue || isGray
+            ? Styles.smallTextLight
+            : theme === "dark"
+            ? Styles.smallTextDark
+            : Styles.smallTextLight
+        }
+      >
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 }

@@ -42,12 +42,13 @@ export const Styles = StyleSheet.create({
   },
   smallTextLight: {
     fontSize: 32,
-    color: myColors.white,
+    color: myColors.black,
   },
   smallTextDark: {
     fontSize: 32,
-    color: myColors.black,
+    color: myColors.white,
   },
+
   //Keyboard
   row: {
     maxWidth: "100%",
