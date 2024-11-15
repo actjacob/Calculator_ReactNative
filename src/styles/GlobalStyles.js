@@ -56,10 +56,10 @@ export const Styles = StyleSheet.create({
   },
   viewBottom: {
     position: "absolute",
-    bottom: 50,
+    bottom: 20,
   },
   screenFirstNumber: {
-    fontSize: 96,
+    fontSize: 60,
     color: myColors.gray,
     fontWeight: "200",
     alignSelf: "flex-end",
