@@ -1,14 +1,16 @@
 import * as React from "react";
+import { useState } from "react";
 import ButtonComponent from "./Button";
 import { View, Text } from "react-native";
 import { Styles } from "../styles/GlobalStyles";
 import { myColors } from "../styles/Colors";
 
 export default function MyKeyboard() {
-  const [firstNumber, setFirstNumber] = React.useState("");
-  const [secondNumber, setSecondNumber] = React.useState("");
-  const [operation, setOperation] = React.useState("");
-  const [result, setResult] = React.useState(null);
+  const [firstNumber, setFirstNumber] = useState("");
+  const [secondNumber, setSecondNumber] = useState("");
+  const [operation, setOperation] = useState("");
+  const [result, setResult] = useState(null);
+  const [isResultShown, setIsResultShown] = useState(false);
 
   const handleNumberPress = (buttonValue) => {
     if (buttonValue === "." && firstNumber.includes(".")) return; // Birden fazla nokta olmasın
@@ -16,6 +18,10 @@ export default function MyKeyboard() {
 
     if (firstNumber.length < 10) {
       setFirstNumber(firstNumber + buttonValue);
+      setResult(firstNumber + buttonValue);
+      // if (result === null && firstNumber === " ") {
+      //   setResult(firstNumber + buttonValue); // İlk sayı yazıldığında, result da ilk sayı olsun
+      // }
     }
   };
 
@@ -25,17 +31,21 @@ export default function MyKeyboard() {
     if (buttonValue === "+/-") {
       if (firstNumber !== "") {
         setFirstNumber((prev) => (parseFloat(prev) * -1).toString());
+        setResult((prev) => (parseFloat(prev) * -1).toString());
       }
     } else if (buttonValue === "%") {
       if (firstNumber !== "") {
         setFirstNumber((prev) => (parseFloat(prev) / 100).toString());
+        setResult((prev) => (parseFloat(prev) / 100).toString());
       }
     } else {
       if (secondNumber === "") {
         setOperation(buttonValue);
         setSecondNumber(firstNumber);
         setFirstNumber("");
+        setResult(firstNumber);
       }
+      setIsResultShown(false); // Sonuç gösterilmeden önce false yapıyoruz
     }
   };
 
@@ -44,10 +54,12 @@ export default function MyKeyboard() {
     setSecondNumber("");
     setFirstNumber("");
     setResult(null);
+    setIsResultShown(false);
   };
 
   const getResult = () => {
     if (firstNumber === "" || secondNumber === "") return;
+
     let calculatedResult;
     switch (operation) {
       case "+":
@@ -71,62 +83,40 @@ export default function MyKeyboard() {
         break;
     }
 
-    setResult(calculatedResult); // Sonucu ayarlıyoruz
-    setFirstNumber(calculatedResult.toString()); // Sonucu ilk sayıya ekliyoruz
-    setSecondNumber(""); // İkinci sayıyı sıfırlıyoruz
-    setOperation(""); // İşlemi sıfırlıyoruz
+    setResult(calculatedResult);
+    setIsResultShown(true); // Sonucu gösterirken true yapıyoruz
   };
 
-  // Son karakteri siler
   const handleBackspace = () => {
     setFirstNumber(firstNumber.slice(0, -1));
+    setResult(firstNumber.slice(0, -1));
   };
 
-  const firstNumberDisplay = () => {
-    if (result !== null) {
-      return (
-        <Text
-          style={[
-            Styles.screenFirstNumber,
-            { color: myColors.result, fontSize: result < 99999 ? 50 : 40 },
-          ]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {result?.toString()}
-        </Text>
-      );
-    }
-
-    if (firstNumber === "" && secondNumber === "") {
-      return <Text style={Styles.screenFirstNumber}>{"0"}</Text>;
-    }
-
-    if (firstNumber === "" && secondNumber !== "") {
-      return (
-        <Text
-          style={[
-            Styles.screenFirstNumber,
-            { fontSize: secondNumber.length > 7 ? 50 : 100 },
-          ]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-        >
-          {secondNumber}
-        </Text>
-      );
-    }
+  const displayScreen = () => {
     return (
-      <Text
-        style={[
-          Styles.screenFirstNumber,
-          { fontSize: firstNumber.length > 7 ? 50 : 100 },
-        ]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-      >
-        {firstNumber}
-      </Text>
+      <View>
+        <Text style={Styles.screenSecondNumber}>
+          {secondNumber}{" "}
+          <Text style={{ color: "purple", fontSize: 50, fontWeight: "500" }}>
+            {" "}
+            {operation}
+          </Text>{" "}
+          {firstNumber}
+        </Text>
+
+        <Text
+          style={[
+            Styles.screenFirstNumber,
+            {
+              color: myColors.black,
+              fontSize: isResultShown ? 50 : 30,
+              fontWeight: isResultShown ? "normal" : "bold",
+            },
+          ]}
+        >
+          {isResultShown ? `= ${result}` : result || firstNumber}
+        </Text>
+      </View>
     );
   };
 
@@ -141,14 +131,7 @@ export default function MyKeyboard() {
           alignSelf: "center",
         }}
       >
-        <Text style={Styles.screenSecondNumber}>
-          {secondNumber}
-          <Text style={{ color: "purple", fontSize: 50, fontWeight: "500" }}>
-            {" "}
-            {operation}
-          </Text>
-        </Text>
-        {firstNumberDisplay()}
+        {displayScreen()}
       </View>
 
       {/* Tuş Takımı */}
