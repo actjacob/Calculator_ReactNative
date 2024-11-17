@@ -13,40 +13,88 @@ export default function MyKeyboard() {
   const [isResultShown, setIsResultShown] = useState(false);
 
   const handleNumberPress = (buttonValue) => {
-    if (buttonValue === "." && firstNumber.includes(".")) return; // Birden fazla nokta olmasın
-    if (firstNumber === "0" && buttonValue !== ".") return; // İlk karakter 0 ve ardından sayı gelmesin
+    if (buttonValue === "." && firstNumber.includes(".")) return; //
+    if (firstNumber === "0" && buttonValue !== ".") return; // İlk
 
     if (firstNumber.length < 10) {
-      setFirstNumber(firstNumber + buttonValue);
-      setResult(firstNumber + buttonValue);
-      // if (result === null && firstNumber === " ") {
-      //   setResult(firstNumber + buttonValue); // İlk sayı yazıldığında, result da ilk sayı olsun
-      // }
+      const newValue = firstNumber + buttonValue;
+      setFirstNumber(newValue);
+
+      if (operation && secondNumber) {
+        const interimResult = calculatedResult(
+          secondNumber,
+          newValue,
+          operation
+        );
+        setResult(interimResult);
+      } else {
+        setResult(newValue);
+      }
     }
   };
 
   const handleOperationPress = (buttonValue) => {
-    if (firstNumber === "") return;
+    if (!firstNumber && !result && !secondNumber) return; //İlk sayı, ikinci sayı veya önceki sonuç yoksa işlem yapma
 
     if (buttonValue === "+/-") {
-      if (firstNumber !== "") {
-        setFirstNumber((prev) => (parseFloat(prev) * -1).toString());
-        setResult((prev) => (parseFloat(prev) * -1).toString());
-      }
+      setFirstNumber((prev) => (parseFloat(prev) * -1).toString());
+      setResult((prev) => (parseFloat(prev) * -1).toString());
     } else if (buttonValue === "%") {
-      if (firstNumber !== "") {
-        setFirstNumber((prev) => (parseFloat(prev) / 100).toString());
-        setResult((prev) => (parseFloat(prev) / 100).toString());
-      }
+      setFirstNumber((prev) => (parseFloat(prev) / 100).toString());
+      setResult((prev) => (parseFloat(prev) / 100).toString());
     } else {
-      if (secondNumber === "") {
-        setOperation(buttonValue);
+      //   if (result && !secondNumber) {
+      //     // Önceki bir sonuç varsa ve ikinci sayı yoksa
+      //     setSecondNumber(result.toString());
+      //   } else if (!secondNumber) {
+      //     // Normal işlem
+      //     setSecondNumber(firstNumber);
+      //   }
+      //   setOperation(buttonValue);
+      //   setFirstNumber("");
+      //   setIsResultShown(false);
+      // }
+      if (result && !secondNumber) {
+        setSecondNumber(result.toString());
+      } else if (!secondNumber) {
         setSecondNumber(firstNumber);
-        setFirstNumber("");
-        setResult(firstNumber);
       }
-      setIsResultShown(false); // Sonuç gösterilmeden önce false yapıyoruz
+
+      if (operation && firstNumber !== "") {
+        // Önceki işlem sonucuyla yeni girilen sayıyı işlemle birleştiriyoruz
+        setSecondNumber(
+          calculatedResult(secondNumber, firstNumber, operation).toString()
+        );
+      }
+
+      // Yeni işlem türünü güncelle
+      setOperation(buttonValue);
+      setFirstNumber(""); // Sonraki sayıyı girebilmek için sıfırla
+      setIsResultShown(false); // Sonucu gizle
     }
+  };
+
+  const calculatedResult = (num1, num2, op) => {
+    let calculatedResult;
+    switch (op) {
+      case "+":
+        calculatedResult = parseFloat(num1) + parseFloat(num2);
+        break;
+      case "-":
+        calculatedResult = parseFloat(num1) - parseFloat(num2);
+        break;
+      case "*":
+        calculatedResult = parseFloat(num1) * parseFloat(num2);
+        break;
+      case "/":
+        calculatedResult =
+          parseFloat(num2) === 0 ? "Hata" : parseFloat(num1) / parseFloat(num2);
+        break;
+      default:
+        calculatedResult = num2;
+        break;
+    }
+    return calculatedResult;
   };
 
   const clear = () => {
@@ -57,36 +105,6 @@ export default function MyKeyboard() {
     setIsResultShown(false);
   };
 
-  const getResult = () => {
-    if (firstNumber === "" || secondNumber === "") return;
-
-    let calculatedResult;
-    switch (operation) {
-      case "+":
-        calculatedResult = parseFloat(secondNumber) + parseFloat(firstNumber);
-        break;
-      case "-":
-        calculatedResult = parseFloat(secondNumber) - parseFloat(firstNumber);
-        break;
-      case "*":
-        calculatedResult = parseFloat(secondNumber) * parseFloat(firstNumber);
-        break;
-      case "/":
-        if (parseFloat(firstNumber) === 0) {
-          calculatedResult = "Hata"; // Sıfıra bölünemez
-        } else {
-          calculatedResult = parseFloat(secondNumber) / parseFloat(firstNumber);
-        }
-        break;
-      default:
-        calculatedResult = firstNumber;
-        break;
-    }
-
-    setResult(calculatedResult);
-    setIsResultShown(true); // Sonucu gösterirken true yapıyoruz
-  };
-
   const handleBackspace = () => {
     setFirstNumber(firstNumber.slice(0, -1));
     setResult(firstNumber.slice(0, -1));
@@ -95,22 +113,31 @@ export default function MyKeyboard() {
   const displayScreen = () => {
     return (
       <View>
+        {/* İkinci ve birinci sayı ile operatör */}
         <Text style={Styles.screenSecondNumber}>
-          {secondNumber}{" "}
+          <Text
+            style={{
+              fontWeight: "bold", // SecondNumber bold
+            }}
+          >
+            {secondNumber}
+          </Text>{" "}
           <Text style={{ color: "purple", fontSize: 50, fontWeight: "500" }}>
-            {" "}
             {operation}
           </Text>{" "}
-          {firstNumber}
+          <Text style={{ fontWeight: firstNumber ? "bold" : "normal" }}>
+            {firstNumber}
+          </Text>
         </Text>
 
+        {/* Sonuç */}
         <Text
           style={[
             Styles.screenFirstNumber,
             {
               color: myColors.black,
               fontSize: isResultShown ? 50 : 30,
-              fontWeight: isResultShown ? "normal" : "bold",
+              fontWeight: isResultShown ? "bold" : "normal",
             },
           ]}
         >
@@ -118,6 +145,15 @@ export default function MyKeyboard() {
         </Text>
       </View>
     );
+  };
+  const getResult = () => {
+    if (!firstNumber || !secondNumber || !operation) return;
+
+    const finalResult = calculatedResult(secondNumber, firstNumber, operation);
+    setResult(finalResult);
+    setSecondNumber(finalResult.toString());
+    setFirstNumber("");
+    setIsResultShown(true); // Sonucu bold yapmak için true
   };
 
   return (
@@ -183,6 +219,7 @@ export default function MyKeyboard() {
           onPress={() => handleOperationPress("+")}
         />
       </View>
+
       <View style={Styles.row}>
         <ButtonComponent title="." onPress={() => handleNumberPress(".")} />
         <ButtonComponent title="0" onPress={() => handleNumberPress("0")} />

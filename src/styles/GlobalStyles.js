@@ -34,7 +34,7 @@ export const Styles = StyleSheet.create({
   btnGray: {
     width: 72,
     height: 72,
-    borderRadius: 72,
+    borderRadius: 24,
     backgroundColor: myColors.btnGray,
     justifyContent: "center",
     alignItems: "center",

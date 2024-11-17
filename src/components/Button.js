@@ -5,30 +5,19 @@ import { Styles } from "../styles/GlobalStyles";
 
 export default function ButtonComponent({ title, onPress, isBlue, isGray }) {
   const theme = useContext(ThemeContext);
+  const buttonStyle = isBlue
+    ? Styles.btnBlue
+    : isGray
+    ? Styles.btnGray
+    : theme === "light"
+    ? Styles.btnLight
+    : Styles.btnDark;
+  const textStyle =
+    theme === "dark" ? Styles.smallTextDark : Styles.smallTextLight;
+
   return (
-    <TouchableOpacity
-      style={
-        isBlue
-          ? Styles.btnBlue
-          : isGray
-          ? Styles.btnGray
-          : theme === "light"
-          ? Styles.btnLight
-          : Styles.btnDark
-      }
-      onPress={onPress}
-    >
-      <Text
-        style={
-          isBlue || isGray
-            ? Styles.smallTextLight
-            : theme === "dark"
-            ? Styles.smallTextDark
-            : Styles.smallTextLight
-        }
-      >
-        {title}
-      </Text>
+    <TouchableOpacity style={buttonStyle} onPress={onPress}>
+      <Text style={textStyle}>{title}</Text>
     </TouchableOpacity>
   );
 }

@@ -6,6 +6,6 @@ export const myColors = {
   btnDark: "#2E2F38",
   gray: "#747477",
   black: "#000000",
-  white: "#FFFFFFF",
+  white: "#FFFFFF", // Fazladan F karakteri kaldırıldı
   result: "#46D5B2",
 };
